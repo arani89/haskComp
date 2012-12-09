@@ -18,10 +18,18 @@ expr:
 |	FLOAT 
 | expr '+' expr		{ $$ = $1 + $3; }
 | expr '-' expr		{ $$ = $1 - $3; }
-| expr '*' expr     { $$ = $1 * $3; }
-| expr '/' expr     { $$ = $1 / $3; }
-| '(' expr ')'	    { $$ = $2; }
-| expr '*' '*' expr { $$ = pow($1, $2); }
+| expr '*' expr     	{ $$ = $1 * $3; }
+| expr '/' expr     	{ $$ = $1 / $3; }
+| '(' expr ')'	    	{ $$ = $2; }
+| expr '*' '*' expr 	{ $$ = pow($1, $4); }
+| '-' expr	    	{ $$ = -$2; }
+| expr '%' expr		{ $$ = $1 % $3; }
+| expr '>' expr		{ $$ = $1 > $3; }
+| expr '<' expr		{ $$ = $1 < $3; }
+| expr '=' '=' expr 	{ $$ = $1 == $4; }
+| expr '>' '=' expr	{ $$ = $1 >= $4; }
+| expr '<' '=' expr	{ $$ = $1 <= $4; }
+|
 ;
 
 %%

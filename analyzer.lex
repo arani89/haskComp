@@ -20,7 +20,7 @@ char str[100];
 			//printf("%d (int) has been read\n", yylval);	
 		    	return INTEGER;
 		}
-[-+*()/\n] 	{	//printf("%s has been read", yytext);
+[-+*()/%><=\n] 	{	//printf("%s has been read", yytext);
 			return *yytext;
 		}
 			
