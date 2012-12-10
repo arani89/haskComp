@@ -3,13 +3,40 @@
 #include <math.h>
 int yylex(void);
 void yyerror(char *);
-//#define YYSTYPE double
+
+enum DataType { boolean, integer, floating };
 %}
-%token INTEGER
-%token FLOAT
+
+%union {
+	enum DataType dataType;
+	double value;
+	int ivalue;
+	int bvalue;
+	}
+%token<dvalue> FLOAT
+%token<ivalue> INTEGER
+%token<bvalue> BOOL
 %%
+
 program:
-	   program expr '\n'	{ printf("%d\n", $2); }
+	   program expr '\n'	{
+					 switch (dataType)
+					 {
+						 case boolean:
+						 if ($2 == 1)
+							 printf("True\n");
+						 else
+							 printf("False\n");
+						 break;
+						 case integer:
+						 printf("%d", (int)$2);
+						 break;
+						 case floating:
+						 printf("%f", $2);
+						 break;
+					 }
+	   			}
+
 | program '\n' 
 |
 ;
@@ -24,11 +51,11 @@ expr:
 | expr '*' '*' expr 	{ $$ = pow($1, $4); }
 | '-' expr	    	{ $$ = -$2; }
 | expr '%' expr		{ $$ = $1 % $3; }
-| expr '>' expr		{ $$ = $1 > $3; }
-| expr '<' expr		{ $$ = $1 < $3; }
-| expr '=' '=' expr 	{ $$ = $1 == $4; }
-| expr '>' '=' expr	{ $$ = $1 >= $4; }
-| expr '<' '=' expr	{ $$ = $1 <= $4; }
+| expr '>' expr		{ $$ = $1 > $3 ? 1 : 0; }
+| expr '<' expr		{ $$ = $1 < $3 ? 1 : 0; }
+| expr '=' '=' expr 	{ $$ = $1 == $4 ? 1 : 0; }
+| expr '>' '=' expr	{ $$ = $1 >= $4 ? 1 : 0; }
+| expr '<' '=' expr	{ $$ = $1 <= $4 ? 1 : 0; }
 |
 ;
 
