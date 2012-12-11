@@ -25,6 +25,7 @@ void yyerror(char *);
 %left '-' '+'
 %left '*' '/' '%'
 %right '^'
+%left LOGIC_AND LOGIC_OR LOGIC_NOT
 %nonassoc UMINUS
 
 %%
@@ -79,7 +80,9 @@ bexpr:
 | nexpr '=' '=' nexpr 	{ $$.value = $1.value == $4.value ? 1 : 0; }
 | nexpr '>' '=' nexpr	{ $$.value = $1.value >= $4.value ? 1 : 0; }
 | nexpr '<' '=' nexpr	{ $$.value = $1.value <= $4.value ? 1 : 0; }
-
+| bexpr LOGIC_AND bexpr { $$.value = $1.value && $3.value; }
+| bexpr LOGIC_OR bexpr	{ $$.value = $1.value || $3.value; }
+| LOGIC_NOT bexpr	{ $$.value = $2.value ? 0 : 1; }
 /*expr:
 	iexpr         
 |	fexpr

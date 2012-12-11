@@ -16,16 +16,23 @@ char str[100];
 			yylval.fvalue.exprType = floating;
 			return FLOAT;	
 		}
-[0-9]+  	{   	yylval.ivalue.value = atoi(yytext);
+[0-9]+		{   	yylval.ivalue.value = atoi(yytext);
 			yylval.ivalue.exprType = integer;
 			//printf("%d (int) has been read\n", yylval);	
 		    	return INTEGER;
 		}
-TRUE		{	yylval.bvalue.value = 1;
+
+&&		{	return LOGIC_AND; }
+
+\|\|		{	return LOGIC_OR;  }
+
+not		{	return LOGIC_NOT; }
+
+True		{	yylval.bvalue.value = 1;
 			yylval.bvalue.exprType = boolean;
 			return BOOL;
 		}
-FALSE		{ 	yylval.bvalue.value = 0;
+False		{ 	yylval.bvalue.value = 0;
 			yylval.bvalue.exprType = boolean;
 			return BOOL;
 		}
