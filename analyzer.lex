@@ -4,34 +4,30 @@
 #include <stdio.h>
 #include <string.h>
 void yyerror(char *);
+#include "defs.h"
 #include "y.tab.h"
 char *p = NULL;
 char str[100];
 %}
 
-enum DataType { boolean, integer, floating};
-%union {
-	enum DataType dataType;
-	double value;
-	int ivalue;
-	int bvalue;
-	}
 %%
 
-[0-9]+\.[0-9]+	{	printf("%s", yytext);
-			yylval.dvalue = atof(yytext);
-			yylval.dataType = floating;
-			printf("%f %s (float) has been read\n", yylval, yytext);
+[0-9]+\.[0-9]+	{	yylval.fvalue.value = atof(yytext);
+			yylval.fvalue.exprType = floating;
 			return FLOAT;	
 		}
-[0-9]+  	{   	yylval.ivalue = atoi(yytext);
-			yylval.dataType = integer;
+[0-9]+  	{   	yylval.ivalue.value = atoi(yytext);
+			yylval.ivalue.exprType = integer;
 			//printf("%d (int) has been read\n", yylval);	
 		    	return INTEGER;
 		}
-TRUE		{	return BOOL;
+TRUE		{	yylval.bvalue.value = 1;
+			yylval.bvalue.exprType = boolean;
+			return BOOL;
 		}
-FALSE		{ 	return BOOL;
+FALSE		{ 	yylval.bvalue.value = 0;
+			yylval.bvalue.exprType = boolean;
+			return BOOL;
 		}
 [-+*()/%><=\n] 	{	//printf("%s has been read", yytext);
 			return *yytext;
