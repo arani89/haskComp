@@ -18,6 +18,7 @@ void yyerror(char *);
 	intValue ivalue;
 	floatValue fvalue;
 	boolValue bvalue;
+	char cvalue;
 	char *svalue;
 	}
 
@@ -25,11 +26,13 @@ void yyerror(char *);
 %token <ivalue> INTEGER
 %token <bvalue> BOOL
 %token <svalue> VARIABLE
+%token <cvalue> CHAR
 
 %type <ivalue> iexpr
 %type <fvalue> fexpr
 %type <fvalue> nexpr
 %type <bvalue> bexpr
+%type <cvalue> cexpr
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -48,6 +51,7 @@ program:
 	   					}
 |	program fexpr '\n'	{	printf("%f", $2.value);	}
 |	program iexpr '\n'	{	printf("%d", $2.value);	}
+|	program cexpr '\n'	{	printf("%c", $2);	}
 |	program assign '\n'	{	}
 |	program VARIABLE '\n'	{	symTabEntry *entry = map_symTab_get(symTab, $2);
 							if (entry == NULL)
@@ -72,6 +76,10 @@ program:
 									case 0:
 									printf("False\n");
 								}
+							}
+							else if (strcmp(entry->dataType, "Char") == 0)
+							{
+								printf("%c\n", *(char *)entry->dataPtr);
 							}
 							else	
 							{
@@ -113,7 +121,16 @@ assign:
 							strcpy(newVarEntry->dataType, "Bool");
 							map_symTab_set(symTab, newVarEntry->name, newVarEntry);
 						}
-
+|	VARIABLE '=' cexpr	{
+							symTabEntry *newVarEntry = malloc(sizeof(symTabEntry));
+							newVarEntry->name = $1;
+							char *temp = NULL;
+							temp = malloc(1);
+							*temp = $3;
+							newVarEntry->dataPtr = temp;
+							strcpy(newVarEntry->dataType, "Char");
+							map_symTab_set(symTab, newVarEntry->name, newVarEntry);
+						}
 nexpr:
      iexpr		{ $$.value = (float)$1.value; }
 | fexpr			{ $$.value = $1.value;	}
@@ -146,7 +163,7 @@ Try to fix */
 
 bexpr:
      BOOL
-| '(' bexpr ')'			{ $$.value = S2.value; }
+| '(' bexpr ')'			{ $$.value = $2.value; }
 | nexpr '>' nexpr		{ $$.value = $1.value > $3.value ? 1 : 0; }
 | nexpr '<' nexpr		{ $$.value = $1.value < $3.value ? 1 : 0; }
 | nexpr '=' '=' nexpr 	{ $$.value = $1.value == $4.value ? 1 : 0; }
@@ -155,6 +172,9 @@ bexpr:
 | bexpr LOGIC_AND bexpr { $$.value = $1.value && $3.value; }
 | bexpr LOGIC_OR bexpr	{ $$.value = $1.value || $3.value; }
 | LOGIC_NOT bexpr	{ $$.value = $2.value ? 0 : 1; }
+
+cexpr:
+     CHAR			{ $$ = $1; }
 /*expr:
 	iexpr         
 |	fexpr

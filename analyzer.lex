@@ -25,7 +25,12 @@ void yyerror(char *);
 			strcpy(yylval.svalue, yytext);			
 			return VARIABLE;
 		}
-			
+
+'[a-zA-Z0-9]'	{
+			yylval.cvalue = yytext[1];
+			return CHAR;
+		}
+
 &&		{	return LOGIC_AND; }
 
 \|\|		{	return LOGIC_OR;  }
