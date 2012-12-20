@@ -6,22 +6,26 @@
 void yyerror(char *);
 #include "defs.h"
 #include "y.tab.h"
-char *p = NULL;
-char str[100];
 %}
 
 %%
 
-[0-9]+\.[0-9]+	{	yylval.fvalue.value = atof(yytext);
+[0-9]+\.[0-9]+ 		{	yylval.fvalue.value = atof(yytext);
 			yylval.fvalue.exprType = floating;
 			return FLOAT;	
 		}
-[0-9]+		{   	yylval.ivalue.value = atoi(yytext);
+[0-9]+	{  	yylval.ivalue.value = atoi(yytext);
 			yylval.ivalue.exprType = integer;
 			//printf("%d (int) has been read\n", yylval);	
-		    	return INTEGER;
+		   	return INTEGER;
 		}
 
+[a-z][a-zA-Z0-9_]*	{
+			yylval.svalue = (char *)malloc(strlen(yytext) + 1);
+			strcpy(yylval.svalue, yytext);			
+			return VARIABLE;
+		}
+			
 &&		{	return LOGIC_AND; }
 
 \|\|		{	return LOGIC_OR;  }

@@ -24,4 +24,19 @@ typedef struct
 	enum DataType exprType;
 	int value;
 }boolValue;
+
+/*typedef struct
+{
+	char *dataTypeName;
+	int dataSize;
+}dataTypeEntry; */
+
+typedef struct
+{
+	int isList;
+	char dataType[10];
+	void *dataPtr;
+	char *name;
+}symTabEntry;
+
 #endif
