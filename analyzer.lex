@@ -11,7 +11,7 @@ void yyerror(char *);
 %%
 
 [0-9]+\.[0-9]+ 		{	yylval.fvalue.value = atof(yytext);
-			yylval.fvalue.exprType = floating;
+			yylval.fvalue.exprType = floating;			
 			return FLOAT;	
 		}
 [0-9]+	{  	yylval.ivalue.value = atoi(yytext);
@@ -45,7 +45,7 @@ False		{ 	yylval.bvalue.value = 0;
 			yylval.bvalue.exprType = boolean;
 			return BOOL;
 		}
-[-+*()/%><=\n] 	{	//printf("%s has been read", yytext);
+[-+*()/%><=\n\[\],\.] 	{	//printf("%s has been read", yytext);
 			return *yytext;
 		}
 			

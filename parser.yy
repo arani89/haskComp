@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include "defs.h"
@@ -7,6 +8,8 @@
 
 map_symTab *symTab;
 map_data *dataTab;
+int loop;
+float floop;
 
 int yylex(void);
 void yyerror(char *);
@@ -87,6 +90,7 @@ program:
 							}
 						 }
 |	program '\n'            ;
+|     program opt_Assign list '\n'   {}
 |
 ;
 
@@ -181,6 +185,76 @@ cexpr:
 |	bexpr
 ;
 */
+
+opt_Assign :
+	 'let' 'listid' '='   {}
+	 |
+;
+	
+list :
+	'[' ']' {printf("[]");}
+//	| ilist 
+	| flist 
+/*	| L1 ':' ilist {}
+	| blist {}*/
+;
+
+
+
+flist :
+	'[' fseq ']' {printf("]");}
+	| '[' nexpr '.' '.' nexpr ']' {	printf("[");
+							if($2.value <= $5.value)
+							{
+								for(floop=$2.value; floop <$5.value-1; floop++)
+									printf("%f,",floop);
+								printf("%f",floop);
+							}
+							printf("]");	
+						}
+	| '[' nexpr '.' '.' ']' {		printf("[");
+							for(floop=$2.value; ; floop++)
+								printf("%f,",floop);
+					}
+;
+
+fseq :
+	INTEGER 				{printf("[%f",(float)$1.value);}
+	| FLOAT 				{printf("[%f",$1.value);}
+	| VARIABLE 				{symTabEntry *entry = map_symTab_get(symTab, $1);
+							if (entry == NULL)
+							{
+								printf("\nUnrecognized variable\n");
+								exit(0);
+							}
+							else if (strcmp(entry->dataType, "Int") == 0)
+							{
+								printf("[%f", (float)(*(int *)entry->dataPtr));
+							}
+							else if (strcmp(entry->dataType, "Float") == 0)
+							{
+								printf("[%f", *(float *)entry->dataPtr);
+							}
+						 }
+	| fseq ',' INTEGER 		{printf(",%f",(float)$3.value);}
+	| fseq ',' FLOAT 			{printf(",%f",$3.value);}
+	| fseq ',' VARIABLE 		{symTabEntry *entry = map_symTab_get(symTab, $3);
+							if (entry == NULL)
+							{
+								printf("\nUnrecognized variable\n");
+								exit(0);
+							}
+							else if (strcmp(entry->dataType, "Int") == 0)
+							{
+								printf(",%f", (float)(*(int *)entry->dataPtr));
+							}
+							else if (strcmp(entry->dataType, "Float") == 0)
+							{
+								printf(",%f", *(float *)entry->dataPtr);
+							}
+						 }
+; 
+
 %%
 
 void yyerror(char *s) {
