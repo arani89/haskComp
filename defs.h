@@ -25,11 +25,19 @@ typedef struct
 	int value;
 }boolValue;
 
+typedef struct
+{
+	int fflag;
+	int noOfItems;
+	void *start;	
+}multiValue;
+
 /*typedef struct
 {
 	char *dataTypeName;
 	int dataSize;
 }dataTypeEntry; */
+
 
 typedef struct
 {

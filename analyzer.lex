@@ -45,7 +45,7 @@ False		{ 	yylval.bvalue.value = 0;
 			yylval.bvalue.exprType = boolean;
 			return BOOL;
 		}
-[-+*()/%><=\n\[\],\.] 	{	//printf("%s has been read", yytext);
+[-+*()/%><=\n\[\],\.\:] 	{	//printf("%s has been read", yytext);
 			return *yytext;
 		}
 			

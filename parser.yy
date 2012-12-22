@@ -6,13 +6,20 @@
 #include "defs.h"
 #include "map_lib.h"
 
+
+typedef struct
+{	
+	void *dataPtr;	
+	struct node *next;
+}node;
+
 map_symTab *symTab;
 map_data *dataTab;
 int loop;
 float floop;
-
 int yylex(void);
 void yyerror(char *);
+void * append(node *sPtr,node *n);
 
 %}
 
@@ -23,7 +30,9 @@ void yyerror(char *);
 	boolValue bvalue;
 	char cvalue;
 	char *svalue;
+	multiValue mv;
 	}
+
 
 %token <fvalue> FLOAT
 %token <ivalue> INTEGER
@@ -31,11 +40,18 @@ void yyerror(char *);
 %token <svalue> VARIABLE
 %token <cvalue> CHAR
 
+
 %type <ivalue> iexpr
 %type <fvalue> fexpr
 %type <fvalue> nexpr
 %type <bvalue> bexpr
 %type <cvalue> cexpr
+%type <mv> bseq
+%type <mv> blist
+%type <mv> fseq
+%type <mv> flist
+%type <mv> list
+
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -46,7 +62,25 @@ void yyerror(char *);
 %%
 
 program:
-	program bexpr '\n'	{
+      program list '\n'   	{
+						printList((node *)$2.start,$2.fflag);
+					}
+|	program VARIABLE '=' list '\n'	{				
+									symTabEntry *newVarEntry = malloc(sizeof(symTabEntry));
+									newVarEntry->name = $2;
+									newVarEntry->dataPtr = $4.start;
+									newVarEntry->isList = 1;
+									if($4.fflag == 0)								
+										strcpy(newVarEntry->dataType, "Int");
+									else if($4.fflag == 1)
+										strcpy(newVarEntry->dataType, "Float");
+									else if($4.fflag == 2)
+										strcpy(newVarEntry->dataType, "Bool");
+									else if($4.fflag == -1)
+										strcpy(newVarEntry->dataType, "Null");							
+									map_symTab_set(symTab, newVarEntry->name, newVarEntry);			
+							}
+|	program bexpr '\n'	{
 					 		if ($2.value == 1)
 						 		printf("True\n");
 					 		else
@@ -63,26 +97,40 @@ program:
 							}
 							else if (strcmp(entry->dataType, "Int") == 0)
 							{
-								printf("%d\n", *(int *)entry->dataPtr);
+								if(entry->isList == 1)
+									printList((node *)entry->dataPtr,0);
+								else
+									printf("%d\n", *(int *)entry->dataPtr);
 							}
 							else if (strcmp(entry->dataType, "Float") == 0)
 							{
-								printf("%f\n", *(float *)entry->dataPtr);
+								if(entry->isList == 1)
+									printList((node *)entry->dataPtr,1);
+								else
+									printf("%f\n", *(float *)entry->dataPtr);
 							}
 							else if (strcmp(entry->dataType, "Bool") == 0)
 							{
-								switch (*(int *)entry->dataPtr)
-								{
-									case 1:
-									printf("True\n");
-									break;
-									case 0:
-									printf("False\n");
+								if(entry->isList == 1)
+									printList((node *)entry->dataPtr,2);
+								else
+								{	switch (*(int *)entry->dataPtr)
+									{
+										case 1:
+										printf("True\n");
+										break;
+										case 0:
+										printf("False\n");
+									}
 								}
 							}
 							else if (strcmp(entry->dataType, "Char") == 0)
 							{
 								printf("%c\n", *(char *)entry->dataPtr);
+							}
+							else if (strcmp(entry->dataType, "Null") == 0)
+							{
+								printList((node *)entry->dataPtr,-1);
 							}
 							else	
 							{
@@ -90,7 +138,6 @@ program:
 							}
 						 }
 |	program '\n'            ;
-|     program opt_Assign list '\n'   {}
 |
 ;
 
@@ -186,23 +233,30 @@ cexpr:
 ;
 */
 
-opt_Assign :
-	 'let' 'listid' '='   {}
-	 |
-;
 	
 list :
-	'[' ']' {printf("[]");}
-//	| ilist 
-	| flist 
-/*	| L1 ':' ilist {}
-	| blist {}*/
+	'[' ']' 				{	$$.start = NULL;
+							$$.fflag = -1;
+						}
+	| flist 				{
+							$$.start = $1.start;
+							$$.fflag = $1.fflag;
+							$$.noOfItems = $1.noOfItems;
+						}
+	| blist 				{
+							$$.start = $1.start;
+							$$.fflag = $1.fflag;
+							$$.noOfItems = $1.noOfItems;
+						}
 ;
-
 
 
 flist :
-	'[' fseq ']' {printf("]");}
+	'[' fseq ']' 			{
+							$$.start = $2.start;
+							$$.fflag = $2.fflag;
+							$$.noOfItems = $2.noOfItems;
+						}
 	| '[' nexpr '.' '.' nexpr ']' {	printf("[");
 							if($2.value <= $5.value)
 							{
@@ -216,44 +270,192 @@ flist :
 							for(floop=$2.value; ; floop++)
 								printf("%f,",floop);
 					}
+	| flist '+' '+' flist		{
+							$$.noOfItems = $1.noOfItems + $4.noOfItems;
+							$$.fflag = $1.fflag || $4.fflag;
+							$$.start = append((node *)$1.start,(node *)$4.start);
+						}
+	| VARIABLE				{	symTabEntry *entry = map_symTab_get(symTab, $1);
+							if (entry == NULL)
+							{
+								printf("\nUnrecognized variable\n");
+								exit(0);
+							}
+							else if(entry->isList != 1)
+							{
+								printf("\nInvalid format\n");
+								exit(0);
+							}
+							else if (strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.fflag = 0;
+
+							}
+							else if (strcmp(entry->dataType, "Float") == 0)
+							{
+								$$.fflag = 1;
+							}
+							else 
+							{
+								printf("\nInvalid type\n");
+								exit(0);
+							}
+							$$.noOfItems = 1;
+							$$.start = entry->dataPtr;
+						 }
 ;
 
 fseq :
-	INTEGER 				{printf("[%f",(float)$1.value);}
-	| FLOAT 				{printf("[%f",$1.value);}
-	| VARIABLE 				{symTabEntry *entry = map_symTab_get(symTab, $1);
+	INTEGER 				{	node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
+							*temp = $1.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = 1;
+							$$.start = n;
+							$$.fflag = 0;
+						}
+	| fseq ',' INTEGER 		{	node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
+							*temp = $3.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = $1.noOfItems + 1;
+							$$.start = append((node *)$1.start,n);
+							$$.fflag = $1.fflag*1;
+//							printList((node *)$$.start,1);
+
+						}
+	| VARIABLE 				{	symTabEntry *entry = map_symTab_get(symTab, $1);
+							node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
 							if (entry == NULL)
 							{
 								printf("\nUnrecognized variable\n");
 								exit(0);
 							}
+							else if(entry->isList == 1)
+							{
+								printf("\nInvalid format\n");
+								exit(0);
+							}
 							else if (strcmp(entry->dataType, "Int") == 0)
 							{
-								printf("[%f", (float)(*(int *)entry->dataPtr));
+								*temp = *(int *)entry->dataPtr;
+								$$.fflag = 0;
+
 							}
 							else if (strcmp(entry->dataType, "Float") == 0)
 							{
-								printf("[%f", *(float *)entry->dataPtr);
+								*temp = *(float *)entry->dataPtr;
+								$$.fflag = 1;
 							}
+							else 
+							{
+								printf("\nInvalid type\n");
+								exit(0);
+							}
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = 1;
+							$$.start = n;
+
 						 }
-	| fseq ',' INTEGER 		{printf(",%f",(float)$3.value);}
-	| fseq ',' FLOAT 			{printf(",%f",$3.value);}
-	| fseq ',' VARIABLE 		{symTabEntry *entry = map_symTab_get(symTab, $3);
+	| fseq ',' VARIABLE 		{	symTabEntry *entry = map_symTab_get(symTab, $3);
+							node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
 							if (entry == NULL)
 							{
 								printf("\nUnrecognized variable\n");
 								exit(0);
 							}
+							else if(entry->isList == 1)
+							{
+								printf("\nInvalid format\n");
+								exit(0);
+							}
 							else if (strcmp(entry->dataType, "Int") == 0)
 							{
-								printf(",%f", (float)(*(int *)entry->dataPtr));
+								*temp = *(int *)entry->dataPtr;
+								$$.fflag = $1.fflag*1;
+
 							}
 							else if (strcmp(entry->dataType, "Float") == 0)
 							{
-								printf(",%f", *(float *)entry->dataPtr);
+								*temp = *(float *)entry->dataPtr;
+								$$.fflag = 1;
 							}
+							else 
+							{
+								printf("\nInvalid type\n");
+								exit(0);
+							}
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = $1.noOfItems + 1;
+							$$.start = append((node *)$1.start,n);
 						 }
+	| FLOAT 				{	node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
+							*temp = $1.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = 1;
+							$$.start = n;
+							$$.fflag = 1;
+						}
+	| fseq ',' FLOAT 			{	node *n = malloc(sizeof(node));
+							float *temp = NULL;
+							temp = malloc(1);
+							*temp = $3.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = $1.noOfItems + 1;
+							$$.start = append((node *)$1.start,n);
+							$$.fflag = 1;
+						}
 ; 
+
+blist : '[' bseq ']' 			{
+							$$.start = $2.start;
+							$$.fflag = $2.fflag;
+							$$.noOfItems = $2.noOfItems;
+						}
+	| blist '+' '+' blist		{
+							$$.start = append((node *)$1.start,(node *)$4.start);
+							$$.noOfItems = $1.noOfItems + $4.noOfItems;
+							$$.fflag = 2;
+						}
+;
+
+bseq : BOOL {					node *n = malloc(sizeof(node));
+							char *temp = NULL;
+							temp = malloc(1);
+							*temp = $1.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = 1;
+							$$.start = n;
+							$$.fflag = 2;
+		}
+	| bseq ',' BOOL {				node *n = malloc(sizeof(node));
+							char *temp = NULL;
+							temp = malloc(1);
+							*temp = $3.value;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = $1.noOfItems + 1;
+							$$.start = append((node *)$1.start,n);
+							$$.fflag = 2;
+				}
+
+;
+
 
 %%
 
@@ -271,6 +473,95 @@ void init_dataType()
 	map_data_set(dataTab, "Char", 1);
 	map_data_set(dataTab, "Bool", 1);
 }
+
+void printList(node *sPtr,int flag)
+{
+	int i;
+	node *s = sPtr;
+	printf("[");
+	if(flag == 2)
+	{
+		switch (*(int *)s->dataPtr)
+		{
+			case 1:
+				printf("True");
+				break;
+			case 0:
+				printf("False");
+			}
+		s = s->next;
+		while(s != NULL)
+		{
+			switch (*(int *)s->dataPtr)
+			{
+				case 1:
+					printf(",True");
+					break;
+				case 0:
+					printf(",False");
+			}
+
+			s = s->next;
+		}
+	}
+	else if(flag == 0)
+	{
+		printf("%d",(int)(*(float *)s->dataPtr));
+		s = s->next;
+		while(s != NULL)
+		{
+			printf(",%d",(int)*((float *)s->dataPtr));
+			s = s->next;
+		}
+	}
+	else if(flag == 1)
+	{
+		printf("%f",*(float *)sPtr->dataPtr);
+		s = s->next;
+		while(s != NULL)
+		{
+			printf(",%f",(*(float *)s->dataPtr));
+			s = s->next;
+		}
+	}
+	printf("]");
+
+}
+
+void * append(node *sPtr,node *n)
+{
+	node *s = sPtr;
+	node *t,*p,*p1;
+	t = malloc(sizeof(node));
+	float *temp = NULL;
+	temp = malloc(1);
+	*temp = *(float *)s->dataPtr;
+//	printf("%f ",*temp);
+	t->dataPtr = temp;
+	t->next = NULL;
+	p1 = t;
+	p = t;
+	s = s->next;	
+	while(s != NULL)
+	{
+		t = malloc(sizeof(node));
+		temp = malloc(1);
+		*temp = *(float *)s->dataPtr;
+//	printf("%f ",*temp);
+		t->dataPtr = temp;
+		t->next = NULL;
+		p->next = t;
+		p = t;
+		s = s->next;
+	}
+	p->next = n;
+	return p1;
+
+
+}
+
+
+
 int main(void) {
 	init_dataType();
 	yyparse();
