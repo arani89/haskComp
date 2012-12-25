@@ -182,9 +182,6 @@ assign:
 							strcpy(newVarEntry->dataType, "Char");
 							map_symTab_set(symTab, newVarEntry->name, newVarEntry);
 						}
-nexpr:
-     iexpr		{ $$.value = (float)$1.value; }
-| fexpr			{ $$.value = $1.value;	}
 
 iexpr:
      INTEGER
@@ -194,7 +191,11 @@ iexpr:
 | iexpr '/' iexpr     	{ $$.value = $1.value / $3.value; }
 | '(' iexpr ')'	    	{ $$.value = $2.value; }
 | iexpr '^' iexpr 	{ $$.value = pow($1.value, $3.value); }
-| '-' iexpr %prec UMINUS	{ $$.value = -$2.value; }
+| '-' INTEGER %prec UMINUS	{ $$.value = -$2.value; }
+
+nexpr:
+     iexpr		{ $$.value = (float)$1.value; }
+| fexpr			{ $$.value = $1.value;	}
 
 fexpr:
      FLOAT
@@ -204,7 +205,7 @@ fexpr:
 | nexpr '/' nexpr     	{ $$.value = $1.value / $3.value; }
 | '(' fexpr ')'	    	{ $$.value = $2.value; }
 | nexpr '^' nexpr 	{ $$.value = pow($1.value, $3.value); }
-| '-' fexpr %prec UMINUS	{ $$.value = -$2.value; }
+| '-' FLOAT %prec UMINUS	{ $$.value = -$2.value; }
 /*Last 4 rules ought to be redundant; but are not (reasons unclear).
 Try to fix */
 | iexpr '+' nexpr	{ $$.value = $1.value + $3.value; }
