@@ -185,6 +185,196 @@ assign:
 
 iexpr:
      INTEGER
+| VARIABLE '+' iexpr	{ 	symTabEntry *entry = NULL;
+						    if ((entry = map_symTab_get(symTab, $1)) != NULL && 
+									strcmp(entry->dataType, "Int") == 0)
+						  	{
+								$$.value = *(int *)entry->dataPtr + $3.value;
+							}
+							else
+							{
+								printf("\nNonexistent variable or \
+									wrong data type of variable %s\n", $1);
+							}
+						}
+| VARIABLE '*' iexpr	{	symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $1)) != NULL && 
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry->dataPtr * $3.value;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+						}
+
+| VARIABLE '-' iexpr	{	symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry->dataPtr - $3.value;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+						}
+| VARIABLE '/' iexpr	{
+							symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry->dataPtr / $3.value;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+						}
+| VARIABLE '+' VARIABLE	{
+							symTabEntry *entry1 = NULL, *entry2 = NULL;
+							if ((entry1 = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry1->dataType, "Int") == 0 &&
+									(entry2 = map_symTab_get(symTab, $3)) != NULL
+									&& strcmp(entry2->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry1->dataPtr +
+									*(int *)entry2->dataPtr;
+							}
+							else if (entry1 == NULL ||
+									strcmp(entry1->dataType, "Int") != 0)
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| VARIABLE '-' VARIABLE {	
+							symTabEntry *entry1 = NULL, *entry2 = NULL;
+							if ((entry1 = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry1->dataType, "Int") == 0 &&
+									(entry2 = map_symTab_get(symTab, $3)) != NULL
+									&& strcmp(entry2->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry1->dataPtr -
+									*(int *)entry2->dataPtr;
+							}
+							else if (entry1 == NULL ||
+									strcmp(entry1->dataType, "Int") != 0)
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| VARIABLE '*' VARIABLE	{	
+							symTabEntry *entry1 = NULL, *entry2 = NULL;
+							if ((entry1 = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry1->dataType, "Int") == 0 &&
+									(entry2 = map_symTab_get(symTab, $3)) != NULL
+									&& strcmp(entry2->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry1->dataPtr *
+									*(int *)entry2->dataPtr;
+							}
+							else if (entry1 == NULL ||
+									strcmp(entry1->dataType, "Int") != 0)
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| VARIABLE '/' VARIABLE {
+							symTabEntry *entry1 = NULL, *entry2 = NULL;
+							if ((entry1 = map_symTab_get(symTab, $1)) != NULL &&
+									strcmp(entry1->dataType, "Int") == 0 &&
+									(entry2 = map_symTab_get(symTab, $3)) != NULL
+									&& strcmp(entry2->dataType, "Int") == 0)
+							{
+								$$.value = *(int *)entry1->dataPtr /
+									*(int *)entry2->dataPtr;
+							}
+							else if (entry1 == NULL ||
+									strcmp(entry1->dataType, "Int") != 0)
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $1);
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| iexpr '+' VARIABLE	{
+							symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $3)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = $1.value / *(int *)entry->dataPtr;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| iexpr '*' VARIABLE	{
+							symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $3)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = $1.value * *(int *)entry->dataPtr;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| iexpr '/' VARIABLE	{
+							symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $3)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = $1.value / *(int *)entry->dataPtr;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
+| iexpr '-' VARIABLE	{
+							symTabEntry *entry = NULL;
+							if ((entry = map_symTab_get(symTab, $3)) != NULL &&
+									strcmp(entry->dataType, "Int") == 0)
+							{
+								$$.value = $1.value - *(int *)entry->dataPtr;
+							}
+							else
+							{
+								printf("\nNonexistent variable or wrong data \
+									type of variable %s", $3);
+							}
+						}
 | iexpr '+' iexpr		{ $$.value = $1.value + $3.value; }
 | iexpr '-' iexpr		{ $$.value = $1.value - $3.value; }
 | iexpr '*' iexpr     	{ $$.value = $1.value * $3.value; }
