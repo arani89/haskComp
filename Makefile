@@ -44,5 +44,5 @@ lex.yy.c: analyzer.lex
 ## from scratch
 
 clean:
-	-rm -f *.o lex.yy.c *.tab.*  a.out *.output
+	-rm -f *.o lex.yy.c *.tab.*  haskComp *.output
 
