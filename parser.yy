@@ -56,8 +56,8 @@ void * append(node *sPtr,node *n);
 %left '-' '+'
 %left '*' '/' '%'
 %right '^'
-%left LOGIC_AND LOGIC_OR LOGIC_NOT
 %nonassoc UMINUS
+%left LOGIC_AND LOGIC_OR LOGIC_NOT
 
 %%
 
@@ -86,6 +86,7 @@ program:
 					 		else
 						 		printf("False\n");
 	   					}
+|   program error '\n'  { }
 |	program fexpr '\n'	{	printf("%f", $2.value);	}
 |	program iexpr '\n'	{	printf("%d", $2.value);	}
 |	program cexpr '\n'	{	printf("%c", $2);	}
@@ -227,7 +228,10 @@ iexpr:
 							if ((entry = map_symTab_get(symTab, $1)) != NULL &&
 									strcmp(entry->dataType, "Int") == 0)
 							{
-								$$.value = *(int *)entry->dataPtr / $3.value;
+								if ($3.value == 0)
+									printf("Infinity\n");
+								else
+									$$.value = *(int *)entry->dataPtr / $3.value;
 							}
 							else
 							{
@@ -308,8 +312,13 @@ iexpr:
 									(entry2 = map_symTab_get(symTab, $3)) != NULL
 									&& strcmp(entry2->dataType, "Int") == 0)
 							{
-								$$.value = *(int *)entry1->dataPtr /
-									*(int *)entry2->dataPtr;
+								if (*(int *)entry2->dataPtr == 0) {
+									printf("Infinity\n");
+									YYERROR;
+								}
+								else
+									$$.value = *(int *)entry1->dataPtr /
+										*(int *)entry2->dataPtr;
 							}
 							else if (entry1 == NULL ||
 									strcmp(entry1->dataType, "Int") != 0)
@@ -354,7 +363,12 @@ iexpr:
 							if ((entry = map_symTab_get(symTab, $3)) != NULL &&
 									strcmp(entry->dataType, "Int") == 0)
 							{
-								$$.value = $1.value / *(int *)entry->dataPtr;
+								if (*(int *)entry->dataPtr == 0) {
+									printf("\nInfinity");
+									YYERROR;
+								}
+								else
+									$$.value = $1.value / *(int *)entry->dataPtr;
 							}
 							else
 							{
@@ -378,7 +392,11 @@ iexpr:
 | iexpr '+' iexpr		{ $$.value = $1.value + $3.value; }
 | iexpr '-' iexpr		{ $$.value = $1.value - $3.value; }
 | iexpr '*' iexpr     	{ $$.value = $1.value * $3.value; }
-| iexpr '/' iexpr     	{ $$.value = $1.value / $3.value; }
+| iexpr '/' iexpr     	{ if ($3.value == 0) {
+							printf("Infinity\n");
+							YYERROR; }
+						  else
+						  	$$.value = $1.value / $3.value; }
 | '(' iexpr ')'	    	{ $$.value = $2.value; }
 | iexpr '^' iexpr 	{ $$.value = pow($1.value, $3.value); }
 | '-' INTEGER %prec UMINUS	{ $$.value = -$2.value; }
