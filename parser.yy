@@ -25,25 +25,21 @@ void * append(node *sPtr,node *n);
 
 
 %union {
-	intValue ivalue;
-	floatValue fvalue;
-	boolValue bvalue;
+	exprValue eValue;
 	char cvalue;
 	char *svalue;
 	multiValue mv;
 	}
 
 
-%token <fvalue> FLOAT
-%token <ivalue> INTEGER
-%token <bvalue> BOOL
+%token <evalue> FLOAT
+%token <evalue> INTEGER
+%token <evalue> BOOL
 %token <svalue> VARIABLE
 %token <cvalue> CHAR
 
 
-%type <ivalue> iexpr
-%type <fvalue> fexpr
-%type <fvalue> nexpr
+%type <evalue> expr
 %type <bvalue> bexpr
 %type <cvalue> cexpr
 %type <mv> bseq
@@ -65,7 +61,7 @@ program:
       program list '\n'   	{
 						printList((node *)$2.start,$2.fflag);
 					}
-|	program VARIABLE '=' list '\n'	{				
+|	program VARIABLE '=' list '\n'	{			
 									symTabEntry *newVarEntry = malloc(sizeof(symTabEntry));
 									newVarEntry->name = $2;
 									newVarEntry->dataPtr = $4.start;
@@ -80,16 +76,32 @@ program:
 										strcpy(newVarEntry->dataType, "Null");							
 									map_symTab_set(symTab, newVarEntry->name, newVarEntry);			
 							}
-|	program bexpr '\n'	{
-					 		if ($2.value == 1)
-						 		printf("True\n");
-					 		else
-						 		printf("False\n");
-	   					}
 |   program error '\n'  { }
-|	program fexpr '\n'	{	printf("%f", $2.value);	}
-|	program iexpr '\n'	{	printf("%d", $2.value);	}
-|	program cexpr '\n'	{	printf("%c", $2);	}
+| 	program expr '\n'	{
+							int dataNo;
+							dataNo = map_data_get(dataTab, $2.dataType);
+							if (dataNo == -1)
+							{
+								printf("\nIncorrect data Type");
+							}
+							else if (strcmp($2.dataType, "Int") == 0)
+							{
+								printf("%d", *(int *)$2.dataPtr);
+							}
+							else if (strcmp($2.dataType, "Float") == 0)
+							{
+								printf("%f", *(float *)$2.dataPtr);
+							}
+							else if (strcmp($2.dataType, "Book") == 0)
+							{
+								printf("%d", *(int *)$2.dataPtr);
+							}
+							else
+							{
+								printf("Custom data Type, cannot print value");
+							}
+						}
+							
 |	program assign '\n'	{	}
 |	program VARIABLE '\n'	{	symTabEntry *entry = map_symTab_get(symTab, $2);
 							if (entry == NULL)
@@ -143,7 +155,7 @@ program:
 ;
 
 assign:
-	VARIABLE '=' iexpr	{
+	VARIABLE '=' expr	{
 							symTabEntry *newVarEntry = malloc(sizeof(symTabEntry));
 							newVarEntry->name = $1;
 							int *temp = NULL;
@@ -184,21 +196,23 @@ assign:
 							map_symTab_set(symTab, newVarEntry->name, newVarEntry);
 						}
 
-iexpr:
-     INTEGER
-| VARIABLE '+' iexpr	{ 	symTabEntry *entry = NULL;
-						    if ((entry = map_symTab_get(symTab, $1)) != NULL && 
-									strcmp(entry->dataType, "Int") == 0)
-						  	{
-								$$.value = *(int *)entry->dataPtr + $3.value;
-							}
-							else
-							{
-								printf("\nNonexistent variable or \
-									wrong data type of variable %s\n", $1);
-							}
+expr:
+     INTEGER			{   int dataId = map_data_get(dataTab, "Int");
+	 						$$.dataPtr = malloc(dataList[dataId].size);
+							strcpy($$.dataType, "Int");
+							*$$.dataPtr = $1;
 						}
-| VARIABLE '*' iexpr	{	symTabEntry *entry = NULL;
+| FLOAT					{ 	int dataId = map_data_get(dataTab, "Float");
+							$$.dataPtr = malloc(dataList[dataId].size);
+							strcpy($$.dataType, "Float");
+							*$$.dataPtr = $1;
+						}
+| BOOL					{	int dataId = map_data_get(dataTab, "Bool");
+							$$.dataPtr = malloc(dataList[dataId].size);
+							strcpy($$.dataType, "Bool");
+							*$$.dataPtr = $1;
+						}
+| expr + expr			{	int 
 							if ((entry = map_symTab_get(symTab, $1)) != NULL && 
 									strcmp(entry->dataType, "Int") == 0)
 							{

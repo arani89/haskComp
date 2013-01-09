@@ -2,28 +2,13 @@
 #else
 #define _DEFS_H
 
-enum DataType
-{
-	floating, integer, boolean
-};
+#define DATASIZE 10
 
 typedef struct
 {
-	enum DataType exprType;
-	int value;
-}intValue;
-
-typedef struct
-{
-	enum DataType exprType;
-	float value;
-}floatValue;
-
-typedef struct
-{
-	enum DataType exprType;
-	int value;
-}boolValue;
+	char dataType[DATASIZE];
+	void *dataPtr;
+}exprValue;
 
 typedef struct
 {
@@ -32,17 +17,16 @@ typedef struct
 	void *start;	
 }multiValue;
 
-/*typedef struct
+typedef struct
 {
-	char *dataTypeName;
-	int dataSize;
-}dataTypeEntry; */
+	int size;
+}dataTypeEntry;
 
 
 typedef struct
 {
 	int isList;
-	char dataType[10];
+	char dataType[DATASIZE];
 	void *dataPtr;
 	char *name;
 }symTabEntry;
