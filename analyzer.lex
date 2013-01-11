@@ -10,15 +10,20 @@ void yyerror(char *);
 
 %%
 
-[0-9]+\.[0-9]+ 		{	yylval.fvalue.value = atof(yytext);
-			yylval.fvalue.exprType = floating;			
-			return FLOAT;	
-		}
-[0-9]+	{  	yylval.ivalue.value = atoi(yytext);
-			yylval.ivalue.exprType = integer;
+[0-9]+\.[0-9]+ 		{
+						strcpy(yylval.value.dataType, "Float");
+						yylval.value.dataPtr = malloc(sizeof(float));
+						*(float *)yylval.value.dataPtr = atof(yytext);
+						return FLOAT;
+					}
+[0-9]+	{  	
+			strcpy(yylval.value.dataType, "Int");
+			yylval.value.dataPtr = malloc(sizeof(int));
+			*(int *)yylval.value.dataPtr = atoi(yytext);
 			//printf("%d (int) has been read\n", yylval);	
 		   	return INTEGER;
 		}
+
 
 [a-z][a-zA-Z0-9_]*	{
 			yylval.svalue = (char *)malloc(strlen(yytext) + 1);
@@ -37,23 +42,28 @@ void yyerror(char *);
 
 not		{	return LOGIC_NOT; }
 
-True		{	yylval.bvalue.value = 1;
-			yylval.bvalue.exprType = boolean;
-			return BOOL;
+True		{
+				strcpy(yylval.value.dataType, "Bool");
+				yylval.value.dataPtr = malloc(1);
+				*(int *)yylval.value.dataPtr = 1;
+				return BOOL;
 		}
-False		{ 	yylval.bvalue.value = 0;
-			yylval.bvalue.exprType = boolean;
-			return BOOL;
-		}
-[-+*()/%><=\n\[\],\.\:] 	{	//printf("%s has been read", yytext);
+False		{
+				strcpy(yylval.value.dataType, "Bool");
+				yylval.value.dataPtr = malloc(1);
+				*(int *)yylval.value.dataPtr = 0;
+				return BOOL;
+			}
+[-+^*()/%><=\n\[\],\.\:] 	{	//printf("%s has been read", yytext);
 			return *yytext;
 		}
 			
-[ \t] 		; 	/* skip whitespace */
-.               {
+[ \t] 		; 	
+.       {
 			//printf("Invalid character %s", yytext);
 			yyerror("invalid character");
 		}
+
 %%
 
 int yywrap(void) {
