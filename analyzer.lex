@@ -32,9 +32,11 @@ void yyerror(char *);
 		}
 
 '[a-zA-Z0-9]'	{
-			yylval.cvalue = yytext[1];
-			return CHAR;
-		}
+					strcpy(yylval.value.dataType, "Char");
+					yylval.value.dataPtr = malloc(sizeof(char));
+					*(char *)yylval.value.dataPtr = yytext[1];
+					return CHAR;
+				}
 
 &&		{	return LOGIC_AND; }
 
@@ -54,6 +56,11 @@ False		{
 				*(int *)yylval.value.dataPtr = 0;
 				return BOOL;
 			}
+==		{	return EQ; }
+>=		{	return GE; }
+>		{	return GT; }
+\<=		{	return LE; }
+\< 		{	return LT; }
 [-+^*()/%><=\n\[\],\.\:] 	{	//printf("%s has been read", yytext);
 			return *yytext;
 		}

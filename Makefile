@@ -27,7 +27,7 @@ lex.yy.o: lex.yy.c y.tab.h
 
 map_lib.o: map_lib.c map_lib.h
 
-misc.o: misc.c
+misc.o: misc.c misc.h
 
 ## This rule will use yacc to generate the files y.tab.c and y.tab.h
 ## from our file calc.y

@@ -7,7 +7,7 @@ Installation
 
 Features
 
-1) Supports expression evaluation
-2) Variables
+1) Supports expression evaluation (all operators allowed in Haskell)
+2) Variables (integer, float, char, boolean)
 3) Lists
 
