@@ -23,6 +23,12 @@ void yyerror(char *);
 			//printf("%d (int) has been read\n", yylval);	
 		   	return INTEGER;
 		}
+if		{
+			return IF;
+		}
+then		{
+			return THEN;
+		}
 
 
 [a-z][a-zA-Z0-9_]*	{

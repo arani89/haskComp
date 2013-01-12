@@ -31,4 +31,10 @@ typedef struct
 	char *name;
 }symTabEntry;
 
+typedef struct
+{	
+	void *dataPtr;	
+	struct node *next;
+}node;
+
 #endif
