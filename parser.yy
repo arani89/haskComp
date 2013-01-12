@@ -126,6 +126,10 @@ expr:
 						*(int *)$$.dataPtr = *(int *)$1.dataPtr;
 						printf("Rule 3\n");
 					}
+| '(' expr ')'		{
+						$$.dataPtr = $2.dataPtr;
+						strcpy($$.dataType, $2.dataType);
+					}
 | VARIABLE			{
 						symTabEntry *entry = NULL;
 						entry = map_symTab_get(symTab, $1);
@@ -163,7 +167,31 @@ expr:
 							*(float *)$$.dataPtr = val1 + val2;
 						}
 					}
-					
+| '-' expr %prec UMINUS	{
+							float val1;
+							int id, intId, floatId;
+							intId = map_data_get(dataTab, "Int");
+							floatId = map_data_get(dataTab, "Float");
+							id = getNoId(&($2), dataTab, &val1);
+							if (id == -1)
+								YYERROR;
+							if (id == intId)
+							{
+								strcpy($$.dataType, $2.dataType);
+								$$.dataPtr = malloc(dataList[id].size);
+								*(int *)$$.dataPtr = -(*(int *)$2.dataPtr);
+							}
+							else if (id == floatId)
+							{
+								strcpy($$.dataType, $2.dataType);
+								$$.dataPtr = malloc(dataList[id].size);
+								*(float *)$$.dataPtr = -(*(float *)$2.dataPtr);
+							}
+							else
+								YYERROR;
+						}
+								
+							
 | expr '-' expr		{
 						float val1, val2;
 						printf("Rule 5\n");
