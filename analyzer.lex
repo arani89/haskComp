@@ -47,7 +47,11 @@ else		{
 					*(char *)yylval.value.dataPtr = yytext[1];
 					return CHAR;
 				}
-
+\"[a-zA-Z0-9]*\"	{
+			yylval.svalue = (char *)malloc(strlen(yytext) + 1);
+			strcpy(yylval.svalue, yytext);		
+			return STRING;	
+				}
 &&		{	return LOGIC_AND; }
 
 \|\|		{	return LOGIC_OR;  }
@@ -71,7 +75,7 @@ False		{
 >		{	return GT; }
 \<=		{	return LE; }
 \< 		{	return LT; }
-[-+^*()/%><=\n\[\],\.\:] 	{	//printf("%s has been read", yytext);
+[-+^*()/%><=\n\[\],\.\:] 	{
 			return *yytext;
 		}
 			

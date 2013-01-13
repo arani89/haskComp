@@ -37,7 +37,7 @@ void yyerror(char *);
 %token <svalue> IF
 %token <svalue> THEN
 %token <svalue> ELSE
-
+%token <svalue> STRING
 
 %type <value> expr
 %type <mv> fseq
@@ -135,6 +135,8 @@ program:
 ;
 
 list :
+
+								
 	'[' ']' 				{	if(ifflag == 0)
 							{		
 								$$.start = NULL;
@@ -158,7 +160,31 @@ list :
 ;
 
 flist :
-	'[' fseq ']' 			{	if(ifflag == 0)
+	 STRING			{
+						if(ifflag == 0)
+                        {
+							int i;
+							node *last = NULL;
+							for (i = 1; i < strlen($1) - 1; i++)
+							{
+								node *n = malloc(sizeof(node));
+                            	char *temp = NULL;
+                            	temp = malloc(sizeof(char));
+								*temp = $1[i];
+                            	n->dataPtr = temp;
+								
+								if (i == 1)
+									$$.start = n;
+								else
+									last->next = n;
+								last = n;
+							}
+							$$.fflag = 4;
+							$$.noOfItems = strlen($1) - 2;
+                        }
+                        else ifflag = 0;
+                    }
+	| '[' fseq ']' 			{	if(ifflag == 0)
 							{
 							$$.start = $2.start;
 							$$.fflag = $2.fflag;
