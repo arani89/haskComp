@@ -29,6 +29,10 @@ if		{
 then		{
 			return THEN;
 		}
+else		{
+			return ELSE;
+		}
+
 
 
 [a-z][a-zA-Z0-9_]*	{

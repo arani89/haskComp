@@ -36,6 +36,7 @@ void yyerror(char *);
 %token <svalue> VARIABLE
 %token <svalue> IF
 %token <svalue> THEN
+%token <svalue> ELSE
 
 
 %type <value> expr
@@ -57,7 +58,7 @@ program:
 |     program list '\n'   	{	
 						if($2.fflag != 3 && ifflag == 0)printList((node *)$2.start,$2.fflag);
 					}
-|	program IF expr THEN  {if(*(int *)$3.dataPtr == 0) ifflag = 1;} program 	{ifflag = 0;}	
+|	program IF expr THEN  {if(*(int *)$3.dataPtr == 0) ifflag = 1;} program ELSE {if(*(int *)$3.dataPtr != 0) ifflag = 1;} program {ifflag = 0;}	
 |	program VARIABLE '=' list '\n'	{				
 								if(ifflag == 0)
 								{
@@ -71,6 +72,8 @@ program:
 										strcpy(newVarEntry->dataType, "Float");
 									else if($4.fflag == 2)
 										strcpy(newVarEntry->dataType, "Bool");
+									else if($4.fflag == 4)
+										strcpy(newVarEntry->dataType, "Char");
 									else if($4.fflag == -1)
 										strcpy(newVarEntry->dataType, "Null");							
 									map_symTab_set(symTab, newVarEntry->name, newVarEntry);
@@ -238,9 +241,9 @@ fseq :
 	INTEGER 				{
 						if(ifflag == 0)
 						{	node *n = malloc(sizeof(node));
-							void *temp = NULL;
-							temp = malloc(1);
-							*(int *)temp = *(int *)$1.dataPtr;
+							float *temp = NULL;
+							temp = malloc(sizeof(float));
+							*temp = *(int *)$1.dataPtr;
 
 							n->dataPtr = temp;
 							n->next = NULL;
@@ -254,7 +257,7 @@ fseq :
 	| FLOAT 				{if(ifflag == 0)
 						{	node *n = malloc(sizeof(node));
 							float *temp = NULL;
-							temp = malloc(1);
+							temp = malloc(sizeof(float));
 							*temp = *(float *)$1.dataPtr;
 							n->dataPtr = temp;
 							n->next = NULL;
@@ -264,10 +267,24 @@ fseq :
 						}
 							else ifflag = 0;
 						}
+	| CHAR 				{if(ifflag == 0)
+						{	node *n = malloc(sizeof(node));
+							char *temp = NULL;
+							temp = malloc(sizeof(char));
+							*temp = *(char *)$1.dataPtr;
+							n->dataPtr = temp;
+							n->next = NULL;
+							$$.noOfItems = 1;
+							$$.start = n;
+							$$.fflag = 4;
+						}
+							else ifflag = 0;
+						}
+
 	| BOOL                        {if(ifflag == 0)
 						{     node *n = malloc(sizeof(node));
 							void *temp = NULL;
-							temp = malloc(1);
+							temp = malloc(sizeof(int));
 							*(int *)temp = *(int *)$1.dataPtr;
 
 							n->dataPtr = temp;
@@ -297,8 +314,14 @@ fseq :
 							}
 							else if (strcmp(entry->dataType, "Int") == 0)
 							{
-								*(int *)temp = *(int *)entry->dataPtr;
+								*(float *)temp = *(int *)entry->dataPtr;
 								$$.fflag = 0;
+
+							}
+							else if (strcmp(entry->dataType, "Char") == 0)
+							{
+								*(char *)temp = *(char *)entry->dataPtr;
+								$$.fflag = 4;
 
 							}
 							else if (strcmp(entry->dataType, "Float") == 0)
@@ -329,7 +352,7 @@ fseq :
 
 	| fseq ',' fseq 		{	if(ifflag == 0)
 						{		if($1.fflag != $3.fflag)
-								if($1.fflag == 2 || $3.fflag == 2)
+								if($1.fflag == 2 || $3.fflag == 2 || $1.fflag == 4 || $3.fflag == 4)
 								{
 									printf("\nInvalid operation");
 									exit(0);
@@ -402,6 +425,10 @@ expr:
 								else if (strcmp(entry->dataType, "Float") == 0)
 								{
 									printList((node *)entry->dataPtr,1);							
+								}
+								else if (strcmp(entry->dataType, "Char") == 0)
+								{
+									printList((node *)entry->dataPtr,4);							
 								}
 								else if (strcmp(entry->dataType, "Bool") == 0)
 								{

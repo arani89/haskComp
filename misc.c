@@ -77,11 +77,11 @@ void printList(node *sPtr,int flag)
 	}
 	else if(flag == 0)
 	{
-		printf("%d",(*(int *)s->dataPtr));
+		printf("%d",(int)(*(float *)s->dataPtr));
 		s = s->next;
 		while(s != NULL)
 		{
-			printf(",%d",(*(int *)s->dataPtr));
+			printf(",%d",(int)(*(float *)s->dataPtr));
 			s = s->next;
 		}
 	}
@@ -95,6 +95,17 @@ void printList(node *sPtr,int flag)
 			s = s->next;
 		}
 	}
+	else if(flag == 4)
+	{
+		printf("'%c'",*(char *)sPtr->dataPtr);
+		s = s->next;
+		while(s != NULL)
+		{
+			printf(",'%c'",(*(char *)s->dataPtr));
+			s = s->next;
+		}
+	}
+
 	printf("]\n");
 
 }
