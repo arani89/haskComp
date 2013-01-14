@@ -196,13 +196,14 @@ flist :
 							{
 
 							$$.noOfItems = $1.noOfItems + $4.noOfItems;
+							 	
 							$$.fflag = ($1.fflag >= $4.fflag)?$1.fflag:$4.fflag;
 							$$.start = append((node *)$1.start,(node *)$4.start);
 							}
 							else ifflag = 0;
 						}
 	| '[' expr '.' '.' ']' {if(ifflag == 0)
-					{	printf("[");
+					{	//printf("[");
 						float val1;
 						int id1, intId;
 						int t;

@@ -59,7 +59,7 @@ void printList(node *sPtr,int flag)
 				break;
 			case 0:
 				printf("False");
-			}
+		}
 		s = s->next;
 		while(s != NULL)
 		{
@@ -71,7 +71,6 @@ void printList(node *sPtr,int flag)
 				case 0:
 					printf(",False");
 			}
-
 			s = s->next;
 		}
 	}
