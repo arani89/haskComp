@@ -10,13 +10,13 @@ YACC = yacc -d
 
 # We assume that your C-compiler is called cc
 
-CC = cc -Wall -g
+CC = cc -g
 
 # calc is the final object that we will generate, it is produced by
 # the C compiler from the y.tab.o and from the lex.yy.o
 
-a.out: y.tab.o lex.yy.o map_lib.o misc.o
-	$(CC) y.tab.o lex.yy.o map_lib.o misc.o -lfl -lm
+haskComp: y.tab.o lex.yy.o map_lib.o misc.o
+	$(CC) y.tab.o lex.yy.o map_lib.o misc.o -lfl -lm -o haskComp
 
 # These dependency rules indicate that (1) lex.yy.o depends on
 # lex.yy.c and y.tab.h and (2) lex.yy.o and y.tab.o depend on calc.h.

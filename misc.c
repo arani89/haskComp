@@ -77,7 +77,7 @@ void printList(node *sPtr,int flag)
 	}
 	else if(flag == 0)
 	{
-		fprintf(stderr, "%d",(int)(*(float *)s->dataPtr));
+		printf("%d",(int)(*(float *)s->dataPtr));
 		s = s->next;
 		while(s != NULL)
 		{

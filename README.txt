@@ -8,6 +8,6 @@ Installation
 Features
 
 1) Supports expression evaluation (all operators allowed in Haskell)
-2) Variables (integer, float, char, boolean)
+2) Variables (integer, float, char, boolean, list)
 3) Lists
-
+4) String handling (using lists of chars)
