@@ -129,7 +129,7 @@ program:
 				
 						}	
 							
-|	program error '\n'	{	}
+|	program error '\n'	{  	}
 |	program assign '\n' {	}
 |	program '\n'            ;
 ;
@@ -192,16 +192,26 @@ flist :
 							}
 							else ifflag = 0;
 						}
-	| flist '+' '+' flist		{	if(ifflag == 0)
+	| flist '+' '+' flist	{	if(ifflag == 0)
 							{
 
 							$$.noOfItems = $1.noOfItems + $4.noOfItems;
-							 	
-							$$.fflag = ($1.fflag >= $4.fflag)?$1.fflag:$4.fflag;
-							$$.start = append((node *)$1.start,(node *)$4.start);
+							if ($1.fflag == $4.fflag ||
+								($1.fflag == 0 && $4.fflag == 1))
+								$$.fflag = $4.fflag;
+							else if ($1.fflag == 1 && $4.fflag == 0)
+								$$.fflag = $1.fflag;
+							else
+							{
+								yyerror("Operand type mismatch");
+								YYERROR;
 							}
-							else ifflag = 0;
-						}
+							$$.start = append((node *)$1.start, (node *)$4.start);
+							}
+							else
+								ifflag = 0;
+							}
+						
 	| '[' expr '.' '.' ']' {if(ifflag == 0)
 					{	//printf("[");
 						float val1;
@@ -210,7 +220,10 @@ flist :
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($2), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("No such data");
 							YYERROR;
+						}
 						printf("[");
 						if (id1 == intId)
 						{
@@ -234,10 +247,16 @@ flist :
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($2), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("No such data");
 							YYERROR;
+						}
 						id2 = getNoId(&($5), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("No such data");
 							YYERROR;
+						}
 						printf("[");
 						if (id1 == intId && id2 == intId)
 						{
@@ -336,14 +355,13 @@ fseq :
 							}
 							else if(entry->isList == 1)
 							{
-								printf("\nInvalid format\n");
-								exit(0);
+								yyerror("Invalid format\n");
+								YYERROR;
 							}
 							else if (strcmp(entry->dataType, "Int") == 0)
 							{
 								*(float *)temp = *(int *)entry->dataPtr;
 								$$.fflag = 0;
-
 							}
 							else if (strcmp(entry->dataType, "Char") == 0)
 							{
@@ -365,8 +383,8 @@ fseq :
 
 							else 
 							{
-								printf("\nInvalid type\n");
-								exit(0);
+								yyerror("Invalid type\n");
+								YYERROR;
 							}
 							n->dataPtr = temp;
 							n->next = NULL;
@@ -381,8 +399,8 @@ fseq :
 						{		if($1.fflag != $3.fflag)
 								if($1.fflag == 2 || $3.fflag == 2 || $1.fflag == 4 || $3.fflag == 4)
 								{
-									printf("\nInvalid operation");
-									exit(0);
+									yyerror("Invalid operation\n");
+									YYERROR;
 								}
 							$$.fflag = ($1.fflag >= $3.fflag)?$1.fflag:$3.fflag;
 							$$.noOfItems = $1.noOfItems + $3.noOfItems;
@@ -414,7 +432,7 @@ expr:
 						$$.dataPtr = malloc(dataList[dataId].size);
 						strcpy($$.dataType, "Int");
 						*(int *)$$.dataPtr = *(int *)$1.dataPtr;
-						printf("Rule 1\n");
+						//printf("Rule 1\n");
 					}
 				}
 | FLOAT				{if(ifflag == 0)
@@ -422,7 +440,7 @@ expr:
 						$$.dataPtr = malloc(dataList[dataId].size);
 						strcpy($$.dataType, "Float");
 						*(float *)$$.dataPtr = *(float *)$1.dataPtr;
-						printf("Rule 2\n");
+						//printf("Rule 2\n");
 					}
 					}
 | BOOL				{if(ifflag == 0)
@@ -430,9 +448,10 @@ expr:
 						$$.dataPtr = malloc(dataList[dataId].size);
 						strcpy($$.dataType, "Bool");
 						*(int *)$$.dataPtr = *(int *)$1.dataPtr;
-						printf("Rule 3\n");
+						//printf("Rule 3\n");
 					}
 					}
+| list				;
 | VARIABLE			{	if(ifflag == 0)
 					{
 							symTabEntry *entry = NULL;
@@ -447,7 +466,6 @@ expr:
 								if(strcmp(entry->dataType, "Int") == 0)
 								{
 									printList((node *)entry->dataPtr,0);
-
 								}
 								else if (strcmp(entry->dataType, "Float") == 0)
 								{
@@ -463,8 +481,8 @@ expr:
 								}							
 								else 
 								{
-									printf("\nInvalid type\n");
-									exit(0);
+									yyerror("Invalid type\n");
+									YYERROR;
 								}
 								listflag=1;
 							}
@@ -483,6 +501,9 @@ expr:
 						*(char *)$$.dataPtr = *(char *)$1.dataPtr;
 					}
 					}
+| '(' expr ')'		{
+						$$ = $2;
+					}
 
 | expr '+' expr		{	if(ifflag == 0)
 					{
@@ -492,10 +513,16 @@ expr:
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($1), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						id2 = getNoId(&($3), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						if (id1 == intId && id2 == intId)
 						{
 							strcpy($$.dataType, "Int");
@@ -519,10 +546,16 @@ expr:
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($1), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						id2 = getNoId(&($3), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						if (id1 == intId && id2 == intId)
 						{
 							strcpy($$.dataType, "Int");
@@ -546,10 +579,16 @@ expr:
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($1), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						id2 = getNoId(&($3), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						if (id1 == intId && id2 == intId)
 						{
 							strcpy($$.dataType, "Int");
@@ -571,10 +610,16 @@ expr:
 						int id1, id2;
 						id1 = getNoId(&($1), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						id2 = getNoId(&($4), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						strcpy($$.dataType, "Float");
 						$$.dataPtr = malloc(sizeof(float));
 						*(float *)$$.dataPtr = pow(val1, val2);
@@ -589,10 +634,16 @@ expr:
 						intId = map_data_get(dataTab, "Int");
 						id1 = getNoId(&($1), dataTab, &val1);
 						if (id1 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						id2 = getNoId(&($3), dataTab, &val2);
 						if (id2 == -1)
+						{
+							yyerror("Invalid data symbol");
 							YYERROR;
+						}
 						if (id1 == intId && id2 == intId)
 						{
 							strcpy($$.dataType, "Int");
