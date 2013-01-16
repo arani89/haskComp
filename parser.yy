@@ -56,16 +56,11 @@ program:program IF expr THEN
   if (*(int *) $3.dataPtr == 0)
     ifflag = 1;
 } program '\n' ELSE
-
 {
   if (*(int *) $3.dataPtr != 0)
     ifflag = 1;
-} program
-
-{
-  ifflag = 0;
-} '\n' | program VARIABLE '=' list '\n'
-
+} program {   ifflag = 0; } '\n'
+| program VARIABLE '=' list '\n'
 {
   if (ifflag == 0)
     {
@@ -168,6 +163,42 @@ list:
       ifflag = 0;
     }
 
+}
+| VARIABLE '+' '+' VARIABLE
+{
+  symTabEntry *entry1, *entry2;
+  if (ifflag == 0)
+  {
+  	  entry1 = map_symTab_get(symTab, $1);
+	  entry2 = map_symTab_get(symTab, $4);
+  	  if (entry1 == NULL || entry2 == NULL
+	  		|| entry1->isList == 0 || entry2->isList == 0)
+	  {
+
+	  	  YYERROR;
+	  }
+	  else if (strcmp(entry1->dataType, entry2->dataType) != 0)
+	  {
+	  	if (strcmp(entry1->dataType, "Int") == 0
+			&& strcmp(entry2->dataType, "Float") == 0)
+		{
+	  	  $$.start = append(entry1->dataPtr, entry2->dataPtr);
+		  $$.fflag = 1;
+		}
+		else if (strcmp(entry1->dataType, "Float") == 0
+			&& strcmp(entry2->dataType, "Int") == 0)
+		{
+		  $$.start = append(entry1->dataPtr, entry2->dataPtr);
+		  $$.fflag = 1;
+		}
+	 }
+	 else
+	 {
+	   $$.start = append(entry1->dataPtr, entry2->dataPtr);
+	   $$.fflag = 0;
+	 }
+  }
+  ifflag = 0;
 }
 
 |flist
