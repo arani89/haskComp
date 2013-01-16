@@ -68,16 +68,7 @@ program:program IF expr THEN
       newVarEntry->name = $2;
       newVarEntry->dataPtr = $4.start;
       newVarEntry->isList = 1;
-      if ($4.fflag == 0)
-	strcpy (newVarEntry->dataType, "Int");
-      else if ($4.fflag == 1)
-	strcpy (newVarEntry->dataType, "Float");
-      else if ($4.fflag == 2)
-	strcpy (newVarEntry->dataType, "Bool");
-      else if ($4.fflag == 4)
-	strcpy (newVarEntry->dataType, "Char");
-      else if ($4.fflag == -1)
-	strcpy (newVarEntry->dataType, "Null");
+	  strcpy(newVarEntry->dataType, $4.dataType);
       map_symTab_set (symTab, newVarEntry->name, newVarEntry);
     }
   else
@@ -156,7 +147,7 @@ list:
   if (ifflag == 0)
     {
       $$.start = NULL;
-      $$.fflag = -1;
+      strcpy($$.dataType, "");
     }
   else
     {
@@ -183,19 +174,23 @@ list:
 			&& strcmp(entry2->dataType, "Float") == 0)
 		{
 	  	  $$.start = append(entry1->dataPtr, entry2->dataPtr);
-		  $$.fflag = 1;
+		  strcpy($$.dataType, "Float");
 		}
 		else if (strcmp(entry1->dataType, "Float") == 0
 			&& strcmp(entry2->dataType, "Int") == 0)
 		{
 		  $$.start = append(entry1->dataPtr, entry2->dataPtr);
-		  $$.fflag = 1;
+		  strcpy($$.dataType, "Float");
+		}
+		else
+		{
+			YYERROR;
 		}
 	 }
 	 else
 	 {
 	   $$.start = append(entry1->dataPtr, entry2->dataPtr);
-	   $$.fflag = 0;
+	   strcpy($$.dataType, entry1->dataType);
 	 }
   }
   ifflag = 0;
@@ -206,7 +201,7 @@ list:
   if (ifflag == 0)
     {
       $$.start = $1.start;
-      $$.fflag = $1.fflag;
+      strcpy($$.dataType, $1.dataType);
       //$$.noOfItems = $1.noOfItems;
     }
   else
@@ -235,7 +230,7 @@ STRING
 	    last->next = n;
 	  last = n;
 	}
-      $$.fflag = 4;
+      strcpy($$.dataType, "Char");
       //$$.noOfItems = strlen ($1) - 2;
     }
   else
@@ -247,7 +242,7 @@ STRING
   if (ifflag == 0)
     {
       $$.start = $2.start;
-      $$.fflag = $2.fflag;
+      strcpy($$.dataType, $2.dataType);
       //$$.noOfItems = $2.noOfItems;
     }
   else
@@ -260,10 +255,11 @@ STRING
     {
 
       //$$.noOfItems = $1.noOfItems + $4.noOfItems;
-      if ($1.fflag == $4.fflag || ($1.fflag == 0 && $4.fflag == 1))
-	$$.fflag = $4.fflag;
-      else if ($1.fflag == 1 && $4.fflag == 0)
-	$$.fflag = $1.fflag;
+      if (strcmp($1.dataType, $4.dataType) == 0 ||
+	  	(strcmp($1.dataType, "Int") == 0  && strcmp($4.dataType, "Float") == 0))
+		strcpy($$.dataType, $4.dataType);
+      else if (strcmp($1.dataType, "Float")  && strcmp($4.dataType, "Int") == 0)
+		strcpy($$.dataType, "Float");
       else
 	{
 	  yyerror ("Operand type mismatch");
@@ -300,7 +296,7 @@ STRING
 	  for (floop = val1;; floop++)
 	    printf ("%f,", floop);
 	}
-      $$.fflag = 3;
+      //$$.fflag = 3;
     }
   else
     ifflag = 0;
@@ -346,7 +342,7 @@ STRING
 	    }
 	}
       printf ("]\n");
-      $$.fflag = 3;
+      //$$.fflag = 3;
     }
   else
     ifflag = 0;
@@ -367,7 +363,7 @@ INTEGER
       n->next = NULL;
       //$$.noOfItems = 1;
       $$.start = n;
-      $$.fflag = 0;
+      strcpy($$.dataType, "Int");
 
     }
   else
@@ -386,7 +382,7 @@ INTEGER
       n->next = NULL;
       //$$.noOfItems = 1;
       $$.start = n;
-      $$.fflag = 1;
+      strcpy($$.dataType, "Float");
     }
   else
     ifflag = 0;
@@ -404,7 +400,7 @@ INTEGER
       n->next = NULL;
       //$$.noOfItems = 1;
       $$.start = n;
-      $$.fflag = 4;
+      strcpy($$.dataType, "Char");
     }
   else
     ifflag = 0;
@@ -423,7 +419,7 @@ INTEGER
       n->next = NULL;
       //$$.noOfItems = 1;
       $$.start = n;
-      $$.fflag = 2;
+      strcpy($$.dataType, "Bool");
 
     }
   else
@@ -448,38 +444,16 @@ INTEGER
 	  yyerror ("Invalid format\n");
 	  YYERROR;
 	}
-      else if (strcmp (entry->dataType, "Int") == 0)
+	else
 	{
-	  temp = malloc(sizeof(int));
-	  *(int *) temp = *(int *) entry->dataPtr;
-	  $$.fflag = 0;
-	}
-      else if (strcmp (entry->dataType, "Char") == 0)
-	{
-	  temp = malloc(sizeof(char));
-	  *(char *) temp = *(char *) entry->dataPtr;
-	  $$.fflag = 4;
-
-	}
-      else if (strcmp (entry->dataType, "Float") == 0)
-	{
-	  temp = malloc(sizeof(float));
-	  *(float *) temp = *(float *) entry->dataPtr;
-	  $$.fflag = 1;
-	}
-      else if (strcmp (entry->dataType, "Bool") == 0)
-	{
-	  temp = malloc(sizeof(int));
-	  *(int *) temp = *(int *) entry->dataPtr;
-	  $$.fflag = 2;
-
+	  int dataId = map_data_get(dataTab, entry->dataType);
+	  if (dataId == -1)
+	     YYERROR;
+	  $$.start = entry->dataPtr;
+	  strcpy($$.dataType, entry->dataType);
+	  	  
 	}
 
-      else
-	{
-	  yyerror ("Invalid type\n");
-	  YYERROR;
-	}
       n->dataPtr = temp;
       n->next = NULL;
       //$$.noOfItems = 1;
@@ -494,13 +468,12 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      if ($1.fflag != $3.fflag)
-	if ($1.fflag == 2 || $3.fflag == 2 || $1.fflag == 4 || $3.fflag == 4)
+      if (strcmp($1.dataType, $3.dataType) != 0)
 	  {
 	    yyerror ("Invalid operation\n");
 	    YYERROR;
 	  }
-      $$.fflag = ($1.fflag >= $3.fflag) ? $1.fflag : $3.fflag;
+      //$$.fflag = ($1.fflag >= $3.fflag) ? $1.fflag : $3.fflag;
       //$$.noOfItems = $1.noOfItems + $3.noOfItems;
       $$.start = append ((node *) $1.start, (node *) $3.start);
 
@@ -568,22 +541,8 @@ INTEGER
 |list
 {
   $$.isList = 1;
-  switch ($1.fflag)
-    {
-    case 0:
-      strcpy ($$.dataType, "Int");
-      break;
-    case 1:
-      strcpy ($$.dataType, "Float");
-      break;
-    case 2:
-      strcpy ($$.dataType, "Bool");
-      break;
-    case 4:
-      strcpy ($$.dataType, "Char");
-      break;
-    }
-	$$.dataPtr = $1.start;
+  strcpy($$.dataType, $1.dataType);
+  $$.dataPtr = $1.start;
 }
 
 |VARIABLE

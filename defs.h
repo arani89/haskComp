@@ -13,7 +13,7 @@ typedef struct
 
 typedef struct
 {
-	int fflag;
+	char dataType[DATASIZE];
 	void *start;	
 }multiValue;
 
