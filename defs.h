@@ -14,7 +14,6 @@ typedef struct
 typedef struct
 {
 	int fflag;
-	int noOfItems;
 	void *start;	
 }multiValue;
 

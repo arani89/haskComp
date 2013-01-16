@@ -207,7 +207,7 @@ list:
     {
       $$.start = $1.start;
       $$.fflag = $1.fflag;
-      $$.noOfItems = $1.noOfItems;
+      //$$.noOfItems = $1.noOfItems;
     }
   else
     ifflag = 0;
@@ -236,7 +236,7 @@ STRING
 	  last = n;
 	}
       $$.fflag = 4;
-      $$.noOfItems = strlen ($1) - 2;
+      //$$.noOfItems = strlen ($1) - 2;
     }
   else
     ifflag = 0;
@@ -248,7 +248,7 @@ STRING
     {
       $$.start = $2.start;
       $$.fflag = $2.fflag;
-      $$.noOfItems = $2.noOfItems;
+      //$$.noOfItems = $2.noOfItems;
     }
   else
     ifflag = 0;
@@ -259,7 +259,7 @@ STRING
   if (ifflag == 0)
     {
 
-      $$.noOfItems = $1.noOfItems + $4.noOfItems;
+      //$$.noOfItems = $1.noOfItems + $4.noOfItems;
       if ($1.fflag == $4.fflag || ($1.fflag == 0 && $4.fflag == 1))
 	$$.fflag = $4.fflag;
       else if ($1.fflag == 1 && $4.fflag == 0)
@@ -365,7 +365,7 @@ INTEGER
 
       n->dataPtr = temp;
       n->next = NULL;
-      $$.noOfItems = 1;
+      //$$.noOfItems = 1;
       $$.start = n;
       $$.fflag = 0;
 
@@ -384,7 +384,7 @@ INTEGER
       *temp = *(float *) $1.dataPtr;
       n->dataPtr = temp;
       n->next = NULL;
-      $$.noOfItems = 1;
+      //$$.noOfItems = 1;
       $$.start = n;
       $$.fflag = 1;
     }
@@ -402,7 +402,7 @@ INTEGER
       *temp = *(char *) $1.dataPtr;
       n->dataPtr = temp;
       n->next = NULL;
-      $$.noOfItems = 1;
+      //$$.noOfItems = 1;
       $$.start = n;
       $$.fflag = 4;
     }
@@ -421,7 +421,7 @@ INTEGER
 
       n->dataPtr = temp;
       n->next = NULL;
-      $$.noOfItems = 1;
+      //$$.noOfItems = 1;
       $$.start = n;
       $$.fflag = 2;
 
@@ -482,7 +482,7 @@ INTEGER
 	}
       n->dataPtr = temp;
       n->next = NULL;
-      $$.noOfItems = 1;
+      //$$.noOfItems = 1;
       $$.start = n;
 
     }
@@ -501,7 +501,7 @@ INTEGER
 	    YYERROR;
 	  }
       $$.fflag = ($1.fflag >= $3.fflag) ? $1.fflag : $3.fflag;
-      $$.noOfItems = $1.noOfItems + $3.noOfItems;
+      //$$.noOfItems = $1.noOfItems + $3.noOfItems;
       $$.start = append ((node *) $1.start, (node *) $3.start);
 
     }
