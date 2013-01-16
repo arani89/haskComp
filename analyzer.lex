@@ -70,6 +70,7 @@ False		{
 				*(int *)yylval.value.dataPtr = 0;
 				return BOOL;
 			}
+\\\n			;
 ==		{	return EQ; }
 >=		{	return GE; }
 >		{	return GT; }

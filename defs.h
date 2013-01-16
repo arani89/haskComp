@@ -6,6 +6,7 @@
 
 typedef struct
 {
+	int isList;
 	char dataType[DATASIZE];
 	void *dataPtr;
 }exprValue;
