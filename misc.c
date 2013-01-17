@@ -76,11 +76,11 @@ void printList(node *sPtr,int flag)
 	}
 	else if(flag == 0)
 	{
-		printf("%d",(int)(*(float *)s->dataPtr));
+		printf("%d", *(int *)s->dataPtr);
 		s = s->next;
 		while(s != NULL)
 		{
-			printf(",%d",(int)(*(float *)s->dataPtr));
+			printf(",%d", *(int *)s->dataPtr);
 			s = s->next;
 		}
 	}
@@ -111,7 +111,15 @@ void printList(node *sPtr,int flag)
 
 void * append(node *sPtr,node *n)
 {
-	node *s = sPtr;
+	node *res = sPtr;
+	while (sPtr->next != NULL)
+	{
+		sPtr = sPtr->next;
+	}
+	sPtr->next = n;
+	return res;
+}
+	/*node *s = sPtr;
 	node *t,*p,*p1;
 	t = malloc(sizeof(node));
 	float *temp = NULL;
@@ -137,7 +145,6 @@ void * append(node *sPtr,node *n)
 	}
 	p->next = n;
 	return p1;
+	*/
 
-
-}
 
