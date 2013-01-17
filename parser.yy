@@ -115,6 +115,7 @@ program:program IF expr THEN
 
 |program error '\n'
 {
+	printf("Syntax error\n");
 }
 
 |program assign '\n'
@@ -693,7 +694,7 @@ INTEGER
 	}
 	ifflag = 0;
 }
-| lexpr:
+lexpr:
 expr ',' lexpr
 {
 	if (ifflag == 0)
@@ -806,8 +807,6 @@ init_dataType ()
 int
 main (void)
 {
-
-
   init_dataType ();
   yyparse ();
   return 0;
