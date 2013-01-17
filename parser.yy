@@ -232,7 +232,7 @@ INTEGER
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	{
 	  yyerror ("Invalid data symbol");
 	  YYERROR;
@@ -269,7 +269,7 @@ INTEGER
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	{
 	  yyerror ("Invalid data symbol");
 	  YYERROR;
@@ -294,6 +294,7 @@ INTEGER
 	}
 	$$.isList = 0;
     }
+	ifflag = 0;
 }
 
 |expr '*' expr
@@ -305,7 +306,8 @@ INTEGER
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      
+      if (id1 == -1 || $1.isList || $3.isList)
 	{
 	  yyerror ("Invalid data symbol");
 	  YYERROR;
@@ -327,8 +329,9 @@ INTEGER
 	  strcpy ($$.dataType, "Float");
 	  $$.dataPtr = malloc (sizeof (float));
 	  *(float *) $$.dataPtr = val1 * val2;
+	  $$.isList = 0;
 	}
-	$$.isList = 0;
+	ifflag = 0;
     }
 }
 
@@ -340,7 +343,7 @@ INTEGER
       printf ("\nRule 7\n");
       int id1, id2;
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $4.isList)
 	{
 	  yyerror ("Invalid data symbol");
 	  YYERROR;
@@ -354,9 +357,10 @@ INTEGER
       strcpy ($$.dataType, "Float");
       $$.dataPtr = malloc (sizeof (float));
       *(float *) $$.dataPtr = pow (val1, val2);
+	  $$.isList = 0;
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |expr '^' expr
@@ -368,7 +372,7 @@ INTEGER
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	{
 	  yyerror ("Invalid data symbol");
 	  YYERROR;
@@ -390,10 +394,11 @@ INTEGER
 	  strcpy ($$.dataType, "Float");
 	  $$.dataPtr = malloc (sizeof (float));
 	  *(float *) $$.dataPtr = pow (val1, val2);
+	  $$.isList = 0;
 	}
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |expr '/' expr
@@ -405,7 +410,7 @@ INTEGER
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -421,10 +426,11 @@ INTEGER
 	  strcpy ($$.dataType, "Float");
 	  $$.dataPtr = malloc (sizeof (float));
 	  *(float *) $$.dataPtr = val1 / val2;
+	  $$.isList = 0;
 	}
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |expr GT expr
@@ -437,7 +443,7 @@ INTEGER
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -448,10 +454,11 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 > val2;
+	  $$.isList = 0;
 	}
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |expr LT expr
@@ -464,7 +471,7 @@ INTEGER
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -475,9 +482,10 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 < val2;
+	  $$.isList = 0;
 	}
     }
-	$$.isList = 0;
+	ifflag = 0;
 }
 
 |expr GE expr
@@ -490,7 +498,7 @@ INTEGER
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -501,10 +509,11 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 >= val2;
+	  $$.isList = 0;
 	}
     }
 	else
-		$$.isList = 0;
+		ifflag = 1;
 }
 
 |expr LE expr
@@ -517,7 +526,7 @@ INTEGER
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -528,10 +537,11 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 <= val2;
+	  $$.isList = 0;
 	}
     }
 	else
-		$$.isList = 0;
+		ifflag = 1;
 }
 
 |expr EQ expr
@@ -544,7 +554,7 @@ INTEGER
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
       id1 = getNoId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getNoId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -555,12 +565,13 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 == val2;
+	  $$.isList = 0;
 	}
       else
 	YYERROR;
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |expr LOGIC_AND expr
@@ -573,7 +584,7 @@ INTEGER
       boolId = map_data_get (dataTab, "Bool");
       id1 = getBoolId (&($1), dataTab, &val1);
       //fprintf (stderr, "%d %d %d", id1, val1, *(int *) $$.dataPtr);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getBoolId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -583,12 +594,12 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 && val2;
+	  $$.isList = 0;
 	}
       else
 	YYERROR;
     }
-	else
-		$$.isList = 0;
+	ifflag = 0;
 }
 
 |expr LOGIC_OR expr
@@ -600,7 +611,7 @@ INTEGER
       int val1, val2;
       boolId = map_data_get (dataTab, "Bool");
       id1 = getBoolId (&($1), dataTab, &val1);
-      if (id1 == -1)
+      if (id1 == -1 || $1.isList || $3.isList)
 	YYERROR;
       id2 = getBoolId (&($3), dataTab, &val2);
       if (id2 == -1)
@@ -610,12 +621,13 @@ INTEGER
 	  strcpy ($$.dataType, "Bool");
 	  $$.dataPtr = malloc (1);
 	  *(int *) $$.dataPtr = val1 || val2;
+	  $$.isList = 0;
 	}
       else
 	YYERROR;
     }
 	else
-		$$.isList = 0;
+		ifflag = 0;
 }
 
 |LOGIC_NOT expr
@@ -627,7 +639,7 @@ INTEGER
       int val2;
       boolId = map_data_get (dataTab, "Bool");
       id2 = getBoolId (&($2), dataTab, &val2);
-      if (id2 == -1)
+      if (id2 == -1 || $2.isList)
 	YYERROR;
       if (id2 == boolId)
 	{
@@ -638,23 +650,30 @@ INTEGER
       else
 	YYERROR;
     }
-	else
-		$$.isList = 0;
+	ifflag = 0;	
 }
 | '[' expr ']'
 {
+	if (ifflag == 0)
+	{
 	$$.isList = 1;
 	node *n = malloc(sizeof(node));
 	n->dataPtr = $2.dataPtr;
 	n->next = NULL;
 	strcpy($$.dataType, $2.dataType);
 	$$.dataPtr = n;
+	}
+	ifflag = 0;
 }
 | '[' lexpr ']'
 {
+	if (ifflag == 0)
+	{
 	$$.isList = 1;
 	$$.dataPtr = $2.dataPtr;
 	strcpy($$.dataType, $2.dataType);
+	}
+	ifflag = 0;
 }
 | expr '+' '+' expr
 {
@@ -662,37 +681,36 @@ INTEGER
 	{
 		if ($1.isList != 1 || $4.isList != 1)
 			YYERROR;
-		if ((!strcmp($1.dataType, $4.dataType)) ||
-		(!strcmp($4.dataType, "Int") && !strcmp($1.dataType, "Float")))
+		if (!strcmp($1.dataType, $4.dataType))
 		{
 			$$.isList = 1;
 			strcpy($$.dataType, $1.dataType);
 			$$.dataPtr = append($1.dataPtr, $4.dataPtr);
 			void *abc = $$.dataPtr;
 		}
-		else if (!strcmp($4.dataType, "Float") &&
-			!strcmp($1.dataType, "Int"))
-		{
-			$$.isList = 1;
-			strcpy($$.dataType, $4.dataType);
-			$$.dataPtr = append($1.dataPtr, $4.dataPtr);
-		}
+		else
+			YYERROR;
 	}
-	ifflag = 1;
+	ifflag = 0;
 }
-
 | lexpr:
 expr ',' lexpr
 {
+	if (ifflag == 0)
+	{
 	node *n = malloc(sizeof(node));
 	n->dataPtr = $1.dataPtr;
 	n->next = NULL;
 	$$.dataPtr = append(n, $3.dataPtr);
 	void *abc = $$.dataPtr;
 	strcpy($$.dataType, $1.dataType);
+	}
+	ifflag = 0;
 }
 | expr ',' expr
 {
+	if (ifflag == 0)
+	{
 	node *n1 = malloc(sizeof(node));
 	node *n2 = malloc(sizeof(node));
 	n1->dataPtr = $1.dataPtr;
@@ -700,8 +718,66 @@ expr ',' lexpr
 	n1->next = n2->next = NULL;
 	strcpy($$.dataType, $1.dataType);
 	$$.dataPtr = append(n1, n2);
+	}
+	ifflag = 0;
 }
-
+| expr '.' '.' expr
+{
+	if (ifflag == 0)
+	{
+	if (!strcmp($1.dataType, "Int") && !strcmp($4.dataType, "Int"))
+	{
+		node *n1 = malloc(sizeof(node));
+		node *n2 = NULL;
+		n1->dataPtr = $1.dataPtr;
+		int i = *(int *)n1->dataPtr;
+		while (i < *(int *)$4.dataPtr)
+		{
+			i++;
+			n2 = malloc(sizeof(node));
+			n2->dataPtr = malloc(sizeof(int));
+			*(int *)(n2->dataPtr) = i;
+			n1 = append(n1, n2);
+		}
+		$$.dataPtr = n1;
+	}
+	else if (!strcmp($1.dataType, "Float") || !strcmp($4.dataType, "Float"))
+	{
+		node *n1 = malloc(sizeof(node));
+		node *n2 = NULL;
+		n1->dataPtr = $1.dataPtr;
+		float i, j;
+		if (!strcmp($1.dataType, $4.dataType))
+		{
+			i = *(float *)n1->dataPtr;
+			j = *(float *)$4.dataPtr;
+		}
+		else if (!strcmp($1.dataType, "Float"))
+		{
+			i = *(float *)n1->dataPtr;
+			j = *(int *)$4.dataPtr;	
+		}
+		else
+		{
+			i = *(int *)n1->dataPtr;
+			j = *(float *)$4.dataPtr;
+		}
+		while (i < j)
+		{
+			i++;
+			n2 = malloc(sizeof(node));
+			n2->dataPtr = malloc(sizeof(float));
+			*(float *)(n2->dataPtr) = i;
+			n1 = append(n1, n2);
+		}
+		$$.dataPtr = n1;
+	}
+	//printList($$.dataPtr, 0);
+	}
+	else
+		YYERROR;
+	ifflag = 0;
+}
 %%
 
 void
