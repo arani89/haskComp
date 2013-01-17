@@ -297,7 +297,31 @@ INTEGER
     }
 	ifflag = 0;
 }
+| '-' expr %prec UMINUS
+{
+  if (ifflag == 0)
+  {
+  if (!strcmp($2.dataType, "Int") || !strcmp($2.dataType, "Float") && !$2.isList)
+  {
+  	 float val;
+     int id = getNoId(&($2), dataTab, &val);
+	 void *newExpr;
+	 newExpr = malloc(dataList[id].size);
+	 if (!strcmp($2.dataType, "Int"))
+	 	*(int *)newExpr = *(int *)$2.dataPtr * -1;
+	 else
+	 	*(float *)newExpr = *(float *)$2.dataPtr * -1;
 
+	 $$.dataPtr = newExpr;
+	 strcpy($$.dataType, $2.dataType);
+	 $$.isList = 0;
+  }
+  else
+  	YYERROR;
+  }
+  ifflag = 0;
+ 
+}
 |expr '*' expr
 {
   if (ifflag == 0)
