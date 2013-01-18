@@ -199,6 +199,7 @@ INTEGER
       $$.dataPtr = malloc (dataList[dataId].size);
       strcpy ($$.dataType, "Char");
       *(char *) $$.dataPtr = *(char *) $1.dataPtr;
+	  $$.isList = 0;
     }
 	ifflag = 0;
 }
