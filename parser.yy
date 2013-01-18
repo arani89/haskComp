@@ -52,15 +52,8 @@
   %left EQ LT GT LE GE
 %%
 
-program:program IF expr THEN
-{
-  if (*(int *) $3.dataPtr == 0)
-    ifflag = 1;
-} program '\n' ELSE
-{
-  if (*(int *) $3.dataPtr != 0)
-    ifflag = 1;
-} program {   ifflag = 0; } '\n'
+program:program IF expr THEN {  if (*(int *) $3.dataPtr == 0)  ifflag = 1;} program '\n' ELSE {  if (*(int *) $3.dataPtr != 0) ifflag = 1;
+} program {  ifflag = 0; } '\n'
 
 |program expr '\n'
 {
@@ -213,8 +206,34 @@ INTEGER
       strcpy ($$.dataType, "Char");
       *(char *) $$.dataPtr = *(char *) $1.dataPtr;
     }
+	ifflag = 0;
 }
 
+| STRING
+{
+	if (ifflag == 0) 
+	{
+		node *prev = NULL;
+		int strLen = strlen($1);
+		int sCtr;
+		for (sCtr = 1; sCtr < strLen - 1; sCtr++)
+		{
+			node *n;
+			n = malloc(sizeof(n));
+			n->dataPtr = malloc(sizeof(char));
+			*(char *)n->dataPtr = $1[sCtr];
+			n->next = NULL;
+			if (prev == NULL)
+				prev = n;
+			else
+				prev = append(prev, n);
+		}
+		$$.dataPtr = prev;
+		strcpy($$.dataType, "Char");
+		$$.isList = 1;
+	}
+	ifflag = 0;
+}
 |'(' expr ')'
 {
   if (ifflag == 0)
@@ -708,9 +727,23 @@ INTEGER
 			YYERROR;
 		if (!strcmp($1.dataType, $4.dataType))
 		{
+			node *list = $1.dataPtr;		
+			node *newNode = NULL, *prevNode = NULL, *fstNewNode;
+			while (list != NULL)
+			{
+				newNode = malloc(sizeof(node));
+				newNode->dataPtr = list->dataPtr;
+				newNode->next = NULL;
+				if (list == $1.dataPtr)
+					fstNewNode = newNode;
+				else
+					prevNode->next = newNode;
+				prevNode = newNode;
+				list = list->next;
+			}
 			$$.isList = 1;
 			strcpy($$.dataType, $1.dataType);
-			$$.dataPtr = append($1.dataPtr, $4.dataPtr);
+			$$.dataPtr = append(fstNewNode, $4.dataPtr);
 			void *abc = $$.dataPtr;
 		}
 		else
