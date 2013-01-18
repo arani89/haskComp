@@ -779,6 +779,68 @@ expr ',' lexpr
 	}
 	ifflag = 0;
 }
+
+| expr ',' expr '.' '.' expr
+{
+	if (ifflag == 0)
+	{
+	if (!strcmp($1.dataType, "Int") && !strcmp($6.dataType, "Int") && !strcmp($3.dataType, "Int"))
+	{
+		node *n1 = malloc(sizeof(node));
+		node *n2 = malloc(sizeof(node));
+		node *n3;
+		n1->dataPtr = $1.dataPtr;
+		n1->next = n2;
+		n2->next = NULL;
+		n2->dataPtr = $3.dataPtr;
+		int i = *(int *)n1->dataPtr;
+		int j = *(int *)n2->dataPtr;
+		int diff = j - i;
+		i = i + diff;
+		while (i < *(int *)$6.dataPtr)
+		{
+			i = i + diff;
+			n3 = malloc(sizeof(node));
+			n3->dataPtr = malloc(sizeof(int));
+			*(int *)(n3->dataPtr) = i;
+			n1 = append(n1, n3);
+		}
+		$$.dataPtr = n1;
+	}
+	else if (!strcmp($1.dataType, "Float") && !strcmp($3.dataType, "Float") && !strcmp($6.dataType, "Float"))
+	{
+		node *n1 = malloc(sizeof(node));
+		node *n2 = malloc(sizeof(node));
+		node *n3 = NULL;
+		n1->dataPtr = $1.dataPtr;
+		n1->next = n2;
+		n2->next = NULL;
+		n2->dataPtr = $3.dataPtr;
+		float i, j, diff, k;
+		if (!strcmp($1.dataType, $6.dataType))
+		{
+			i = *(float *)n1->dataPtr;
+			j = *(float *)$6.dataPtr;
+			k = *(float *)n2->dataPtr;
+		}
+		diff = k - i;
+		i = i + diff;
+		while (i < j)
+		{
+			i = i + diff;
+			n3 = malloc(sizeof(node));
+			n3->dataPtr = malloc(sizeof(float));
+			*(float *)(n3->dataPtr) = i;
+			n1 = append(n1, n3);
+		}
+		$$.dataPtr = n1;
+	}
+	//printList($$.dataPtr, 0);
+	}
+	else
+		YYERROR;
+	ifflag = 0;
+}
 | expr '.' '.' expr
 {
 	if (ifflag == 0)
