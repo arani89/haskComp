@@ -41,9 +41,6 @@
   %token < svalue > STRING
   %type < value > expr
   %type < value > lexpr
-  /*%type < mv > fseq*/
-  /*%type < mv > flist */
-  /*%type < mv > list */
   %left '-' '+'
   %left '*' '/' '%'
   %right '^'
@@ -52,8 +49,8 @@
   %left EQ LT GT LE GE
 %%
 
-program:program IF expr THEN {  if (*(int *) $3.dataPtr == 0)  ifflag = 1;} program '\n' ELSE {  if (*(int *) $3.dataPtr != 0) ifflag = 1;
-} program {  ifflag = 0; } '\n'
+program:
+program IF expr THEN {  if (*(int *) $3.dataPtr == 0)  ifflag = 1;} program ELSE {  if (*(int *) $3.dataPtr != 0) ifflag = 1; } program {  ifflag = 0; } 
 
 |program expr '\n'
 {
@@ -114,9 +111,7 @@ program:program IF expr THEN {  if (*(int *) $3.dataPtr == 0)  ifflag = 1;} prog
 |program assign '\n'
 {
 }
-
-|program '\n';
-|;
+| ;
 
 assign:
 VARIABLE '=' expr
@@ -186,8 +181,7 @@ INTEGER
       entry = map_symTab_get (symTab, $1);
       if (entry == NULL)
 	  {
-	    printf ("\nUnrecognized variable\n");
-	    exit (0);
+		  YYERROR;
 	  }
 	  $$.dataPtr = entry->dataPtr;
 	  strcpy ($$.dataType, entry->dataType);
@@ -248,7 +242,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 4\n");
+      //printf ("Rule 4\n");
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
@@ -285,7 +279,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 5\n");
+      //printf ("Rule 5\n");
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
@@ -346,7 +340,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("\nRule 6\n");
+      //printf ("\nRule 6\n");
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
@@ -384,7 +378,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("\nRule 7\n");
+      //printf ("\nRule 7\n");
       int id1, id2;
       id1 = getNoId (&($1), dataTab, &val1);
       if (id1 == -1 || $1.isList || $4.isList)
@@ -412,7 +406,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 8\n");
+      //printf ("Rule 8\n");
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
@@ -450,7 +444,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 9\n");
+      //printf ("Rule 9\n");
       int id1, id2, intId;
       intId = map_data_get (dataTab, "Int");
       id1 = getNoId (&($1), dataTab, &val1);
@@ -482,7 +476,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 10\n");
+      //printf ("Rule 10\n");
       int id1, id2, intId, floatId;
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
@@ -510,7 +504,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 11\n");
+      //printf ("Rule 11\n");
       int id1, id2, intId, floatId;
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
@@ -537,7 +531,7 @@ INTEGER
   if (ifflag == 0)
     {
       float val1, val2;
-      printf ("Rule 12\n");
+      //printf ("Rule 12\n");
       int id1, id2, intId, floatId;
       intId = map_data_get (dataTab, "Int");
       floatId = map_data_get (dataTab, "Float");
@@ -564,7 +558,7 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      printf ("Rule 13\n");
+      //printf ("Rule 13\n");
       float val1, val2;
       int id1, id2, intId, floatId;
       intId = map_data_get (dataTab, "Int");
@@ -592,7 +586,7 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      printf ("Rule 14\n");
+      //printf ("Rule 14\n");
       float val1, val2;
       int id1, id2, intId, floatId;
       intId = map_data_get (dataTab, "Int");
@@ -622,7 +616,7 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      printf ("Rule 15\n");
+      //printf ("Rule 15\n");
       int id1, id2, boolId;
       int val1, val2;
       boolId = map_data_get (dataTab, "Bool");
@@ -650,7 +644,7 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      printf ("Rule 16\n");
+      //printf ("Rule 16\n");
       int id1, id2, boolId;
       int val1, val2;
       boolId = map_data_get (dataTab, "Bool");
@@ -678,7 +672,7 @@ INTEGER
 {
   if (ifflag == 0)
     {
-      printf ("Rule 17\n");
+      //printf ("Rule 17\n");
       int id2, boolId;
       int val2;
       boolId = map_data_get (dataTab, "Bool");

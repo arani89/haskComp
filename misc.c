@@ -119,32 +119,5 @@ void * append(node *sPtr,node *n)
 	sPtr->next = n;
 	return res;
 }
-	/*node *s = sPtr;
-	node *t,*p,*p1;
-	t = malloc(sizeof(node));
-	float *temp = NULL;
-	temp = malloc(1);
-	*temp = *(float *)s->dataPtr;
-//	printf("%f ",*temp);
-	t->dataPtr = temp;
-	t->next = NULL;
-	p1 = t;
-	p = t;
-	s = s->next;	
-	while(s != NULL)
-	{
-		t = malloc(sizeof(node));
-		temp = malloc(1);
-		*temp = *(float *)s->dataPtr;
-//	printf("%f ",*temp);
-		t->dataPtr = temp;
-		t->next = NULL;
-		p->next = t;
-		p = t;
-		s = s->next;
-	}
-	p->next = n;
-	return p1;
-	*/
 
 

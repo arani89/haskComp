@@ -80,7 +80,7 @@ void map_symTab_set(map_symTab *m,char *name,symTabEntry *value) {
 symTabEntry *map_symTab_get(map_symTab *m,char *name) {
    map_symTab *map;
    for(map=m;map!=NULL;map=map->nxt) {
-      if(!strcmp(name,map->name)) {
+      if(map->name != NULL && !strcmp(name,map->name)) {
          return map->value;
       }
    }
